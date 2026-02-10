@@ -1,0 +1,7 @@
+ALLOW_ORIGINS:
+  - http://orders.local/
+  - https://orders.local/
+  - http://127.0.0.1:9080/
+  
+DB:
+  DATABASE: test_orders_db
