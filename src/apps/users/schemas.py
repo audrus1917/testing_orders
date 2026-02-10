@@ -9,7 +9,7 @@ from pydantic import EmailStr
 class UserOut(schemas.BaseUser[int]):
     id: models.ID
     email: EmailStr
-    joined_at: datetime
+    created_at: datetime
     is_active: bool = True
     is_superuser: bool = False
     is_verified: bool = False
@@ -22,6 +22,7 @@ class UserIn(schemas.BaseUserCreate):
     is_active: Optional[bool] = True
     is_superuser: Optional[bool] = False
     is_verified: Optional[bool] = False
+    last_login: Optional[datetime] = None
 
 
 class UserUpdate(schemas.BaseUserUpdate):
