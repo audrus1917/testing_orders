@@ -23,8 +23,6 @@ engine: AsyncEngine = create_async_engine(
 
 
 async def get_session():
-    """Returns the `Session`."""
-
     async_session = async_sessionmaker(
         engine, class_=AsyncSession, expire_on_commit=False
     )

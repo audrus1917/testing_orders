@@ -12,11 +12,7 @@ from fastapi_cache.backends.redis import RedisBackend
 
 from src.core.config import get_settings
 from src.database.alchemy import engine
-
-# from src.core.auth.strategy import auth_router, register_router
-# from src.apps.users.routes import users_router
-# from src.apps.persons.routes import persons_router
-# from src.apps.competitions.routes import competitions_router
+from src.core.auth.strategy import auth_router, register_router
 
 from . import tags_metadata
 
@@ -69,7 +65,8 @@ app.add_middleware(
     allow_headers=['*'],
 )
 
-# app.include_router(auth_router, tags=["auth"], prefix="/auth/jwt")
-# app.include_router(register_router, tags=["auth"], prefix="/auth")
-# app.include_router(users_router, tags=['users'], prefix='/users')
+app.include_router(auth_router, tags=["auth"], prefix="/auth/jwt")
+app.include_router(register_router, tags=["auth"], prefix="/auth")
 
+for x in app.routes:
+    print(x)
