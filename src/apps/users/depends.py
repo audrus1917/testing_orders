@@ -1,28 +1,23 @@
-"""The dependencies for User."""
-
-from typing import AsyncGenerator
+from typing import Any, Optional
 
 from fastapi import Depends
-from fastapi_users_db_sqlalchemy import SQLAlchemyUserDatabase
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database.alchemy import get_session
-
 from src.apps.users.models import User
-from src.apps.users.manager import UserManager
+from src.oauth2.tokens import oauth2_scheme, verify_access_token
 
 
-async def _get_user_db(
-    session: AsyncSession = Depends(get_session),
-) -> AsyncGenerator[SQLAlchemyUserDatabase, None]:
-    yield SQLAlchemyUserDatabase(session, User)
-
-
-async def get_user_manager(
-    user_db=Depends(_get_user_db)
-) -> AsyncGenerator[UserManager, None]:
-    yield UserManager(user_db)
-
-
-__all__ = ['get_user_manager']
-
+async def get_current_user(
+    token: Any = Depends(oauth2_scheme),
+    session: AsyncSession = Depends(get_session)
+) -> Optional[User]:
+    """Возвращает текущего пользователя."""
+    
+    token = verify_access_token(token)
+    result = await session.execute(
+        select(User).where(User.id == token.id)
+    )
+    user = result.scalar_one_or_none()
+    return user

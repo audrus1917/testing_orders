@@ -36,7 +36,8 @@ class ApplicationSettings(BaseSettings):
     VERSION: str = Field(default="0.1", title="Версия  API")
     API_VERSION: int = Field(default=1, title="Префикс версии")
     SECRET_KEY: str = Field(default=secrets.token_urlsafe(32))
-    ACCESS_TOKEN_EXPIRE_SECONDS: int = 60 * 60
+    ALGORITHM: str = Field(default="HS256")
+    ACCESS_TOKEN_EXPIRE_SECONDS: int = 10 * 60
     HOST: str = Field(default="orders.local")
     PORT: int = Field(default=8080)
 
