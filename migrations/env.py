@@ -10,6 +10,7 @@ from sqlalchemy import URL, create_engine
 from src.core.config import get_settings
 
 from src.apps.users.models import User
+from src.apps.orders.models import Order
 from src.database.alchemy import METADATA
 
 

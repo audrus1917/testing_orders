@@ -16,8 +16,6 @@ async def get_current_user(
     """Возвращает текущего пользователя."""
     
     token = verify_access_token(token)
-    result = await session.execute(
-        select(User).where(User.id == token.id)
-    )
+    result = await session.execute(select(User).where(User.id == token.id))
     user = result.scalar_one_or_none()
     return user

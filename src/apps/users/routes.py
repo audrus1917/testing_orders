@@ -23,7 +23,7 @@ users_router = APIRouter()
 
 
 @users_router.post(
-    "/register",
+    "/register/",
     responses={
         status.HTTP_201_CREATED: {"model": UserRead},
         status.HTTP_400_BAD_REQUEST: {"model": UniqueConstraint}

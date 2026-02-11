@@ -18,7 +18,7 @@ auth_router = APIRouter(tags=["Authentication"])
 
 
 @auth_router.post(
-    "/token",
+    "/token/",
     response_model=schemas.Token,
     responses={
         status.HTTP_200_OK: {"model": schemas.Token},
