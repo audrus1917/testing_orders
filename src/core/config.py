@@ -38,6 +38,7 @@ class ApplicationSettings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_SECONDS: int = 10 * 60
     HOST: str = Field(default="orders.local")
     PORT: int = Field(default=8080)
+    CACHE_TTL: int = Field(default=5, title="TTL для кэша в минутах")
 
     @property
     def BASE_API_PREFIX(self):

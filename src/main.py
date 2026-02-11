@@ -38,7 +38,7 @@ async def lifespan(_: BaseAPI) -> AsyncIterator[None]:
         encoding='utf-8',
         decode_responses=True,
     )
-    FastAPICache.init(RedisBackend(redis_back), prefix='app-cache')
+    FastAPICache.init(RedisBackend(redis_back), prefix='orders-cache')
 
     yield
 

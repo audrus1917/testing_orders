@@ -44,5 +44,10 @@ class OrderRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-class OrdeUpdateStatus(BaseModel):
+class OrderUpdateStatus(BaseModel):
     status: OrderStatus
+
+
+class OrderListRead(BaseModel):
+    items: List[OrderRead]
+    total: int
