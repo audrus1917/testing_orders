@@ -6,6 +6,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 import redis.asyncio
+import aio_pika
 
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
@@ -30,18 +31,22 @@ class BaseAPI(FastAPI):
 
 
 @asynccontextmanager
-async def lifespan(_: BaseAPI) -> AsyncIterator[None]:
+async def lifespan(app: BaseAPI) -> AsyncIterator[None]:
     """Цикл начала и завершения работы приложения."""
 
     redis_back = redis.asyncio.Redis.from_url(
-        f'redis://{settings.REDIS.REDIS_HOST}:{settings.REDIS.REDIS_PORT}',
+        settings.REDIS.uri,
         encoding='utf-8',
         decode_responses=True,
     )
     FastAPICache.init(RedisBackend(redis_back), prefix='orders-cache')
 
+    print(settings.RABBIT.uri)
+    app.state.broker_connection = await aio_pika.connect(settings.RABBIT.uri)
+
     yield
 
+    await app.state.broker_connection.close()
     await redis_back.close()
     engine.clear_compiled_cache()
     await engine.dispose()

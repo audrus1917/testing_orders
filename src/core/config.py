@@ -6,7 +6,7 @@ from typing import List
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
-import secrets
+import logging
 
 from pydantic import Field
 from pydantic_settings import (
@@ -76,6 +76,28 @@ class RedisSettings(BaseSettings):
     REDIS_HOST: str = Field(default="localhost", title="Хост для `Redis`")
     REDIS_PORT: int = Field(default=6379, title="Порт для `Redis`")
 
+    @property
+    def uri(self) -> str:
+        return f"redis://{self.REDIS_HOST}:{self.REDIS_PORT}"
+
+
+class RabbitSettings(BaseSettings):
+    """Настройки RabbitMQ."""
+
+    RABBIT_HOST: str = Field(default="localhost")
+    RABBIT_VHOST: str = Field(default="")
+    RABBIT_PORT: int = Field(default=5672)
+    RABBIT_USER: str = Field(default="orders")
+    RABBIT_PASSWORD: str = Field(default="orders")
+    RABBIT_QUEUE: str = Field(default="orders_queue")
+
+    @property
+    def uri(self) -> str:
+        return (
+            f"amqp://{self.RABBIT_USER}:{self.RABBIT_PASSWORD}@{self.RABBIT_HOST}:{self.RABBIT_PORT}"
+            f"?{self.RABBIT_VHOST}"
+        )
+
 
 class Settings(BaseSettings):
     """Настройки приложения."""
@@ -86,16 +108,18 @@ class Settings(BaseSettings):
     )
 
     APPLICATION: ApplicationSettings = Field(default=ApplicationSettings())
-    SECRET_KEY: str = "61d4HpCGOq2JAYO5l_EeVJS7vA6IkGWIdVwj-ja3JfU" # Field(default=secrets.token_urlsafe(32))
+    SECRET_KEY: str = Field(default="61d4HpCGOq2JAYO5l_EeVJS7vA6IkGWIdVwj-ja3JfU")
     ALGORITHM: str = Field(default="HS256")
 
     DB: PGSettings = Field(default=PGSettings())
     REDIS: RedisSettings = Field(default=RedisSettings())
+    RABBIT: RabbitSettings = Field(default=RabbitSettings())
     DEBUG: bool = True
     BASE_DIR: Path = Path().absolute()
     TZ_NAME: str = "Europe/Moscow"
     TZ_OFFSET: int = 3
     ALLOW_ORIGINS: List[str] = ["http://orders.local:8000/",]
+    LOGGING_LEVEL: int = logging.WARNING
 
     @classmethod
     def settings_customise_sources(

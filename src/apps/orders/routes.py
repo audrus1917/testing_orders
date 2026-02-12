@@ -9,6 +9,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import SQLAlchemyError
 
+from fastapi import BackgroundTasks, Request
 from fastapi.exceptions import HTTPException
 from fastapi import APIRouter, status, Depends
 from fastapi_cache.decorator import cache
@@ -26,8 +27,8 @@ from src.apps.orders.schemas import (
 )
 
 from src.apps.orders.depends import get_order_by_id
-
 from src.apps.users.depends import get_current_user, get_user_by_id
+from src.apps.orders.tasks import new_order_notify
 
 logger = logging.getLogger(__name__)
 settings = get_settings()
@@ -41,6 +42,8 @@ orders_router = APIRouter()
     description="Добавление нового заказа"
 )
 async def create_order(
+    request: Request,
+    background_tasks: BackgroundTasks,
     order_data: OrderCreate,
     session: AsyncSession = Depends(get_session),
     _: User = Depends(get_current_user)
@@ -63,7 +66,15 @@ async def create_order(
 
     await session.refresh(new_order)
 
-    return OrderRead.model_validate(new_order, from_attributes=True)
+    result = OrderRead.model_validate(new_order, from_attributes=True)
+    print('Here')
+    background_tasks.add_task(
+        new_order_notify, 
+        request.app.state.broker_connection, 
+        result
+    )
+    print("Here 2")
+    return result
 
 
 @orders_router.get(
@@ -113,7 +124,7 @@ async def update_order_status(
 
 @orders_router.get(
     "/user/{user_id}",
-    # response_model=OrderListRead,
+    response_model=OrderListRead,
     description="Список заказов пользователя"
 )
 async def get_user_orders(
@@ -122,6 +133,12 @@ async def get_user_orders(
     user: User = Depends(get_current_user),
 ):
     """Возвращает cписок заказов пользователя."""
+
+    if not user.is_superuser:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Недостаточно прав"
+        )
 
     stmt = select(Order).where(Order.user_id == user_model.id)
     result = await session.execute(stmt)
