@@ -67,13 +67,11 @@ async def create_order(
     await session.refresh(new_order)
 
     result = OrderRead.model_validate(new_order, from_attributes=True)
-    print('Here')
     background_tasks.add_task(
         new_order_notify, 
         request.app.state.broker_connection, 
         result
     )
-    print("Here 2")
     return result
 
 

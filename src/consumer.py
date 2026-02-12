@@ -4,19 +4,35 @@
 
 import asyncio
 import logging
+import time
 
 import aio_pika
+from celery import Celery
+
 from src.core.config import get_settings
 
 settings = get_settings()
 
 logging.basicConfig(
     level=settings.LOGGING_LEVEL,
-    format="[%(asctime)s] {%(pathname)s:%(lineno)d} %(levelname)s - %(message)s",
+    format="[%(asctime)s] {%(filename)s:%(lineno)d} %(levelname)s - %(message)s",
     datefmt="%H:%M:%S",
 )
-logging.getLogger("aio_pika").setLevel(logging.DEBUG)
+logging.getLogger("aio_pika").setLevel(logging.WARNING)
 logger = logging.getLogger(__name__)
+
+
+celery_app = Celery(
+    "src.consumer",
+    broker=settings.RABBIT.uri,
+    backend=settings.REDIS.uri
+)
+
+
+@celery_app.task
+def ding_about_order(order_data):
+    time.sleep(2)
+    print(order_data)
 
 
 async def main():
@@ -33,7 +49,9 @@ async def main():
         async with queue.iterator() as queue_iter:
             async for message in queue_iter:
                 async with message.process():
-                    print(f"Получено сообщение: {message.body.decode()}")
+                    msg = message.body.decode()
+                    print(f"Получено сообщение: {msg}")
+                    ding_about_order.delay(msg)
 
 
 if __name__ == "__main__":

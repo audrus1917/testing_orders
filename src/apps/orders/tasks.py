@@ -36,5 +36,4 @@ async def new_order_notify(
         message,
         routing_key=queue_name
     )
-    print(message_body)        
     logger.debug(f"Отправлено: {message_body}")

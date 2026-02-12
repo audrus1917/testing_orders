@@ -41,7 +41,6 @@ async def lifespan(app: BaseAPI) -> AsyncIterator[None]:
     )
     FastAPICache.init(RedisBackend(redis_back), prefix='orders-cache')
 
-    print(settings.RABBIT.uri)
     app.state.broker_connection = await aio_pika.connect(settings.RABBIT.uri)
 
     yield
