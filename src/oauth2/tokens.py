@@ -15,8 +15,8 @@ from . import schemas
 
 settings = get_settings()
 
-SECRET_KEY = settings.APPLICATION.SECRET_KEY
-ALGORITHM = settings.APPLICATION.ALGORITHM
+SECRET_KEY = settings.SECRET_KEY
+ALGORITHM = settings.ALGORITHM
 ACCESS_TOKEN_EXPIRE_MINUTES = settings.APPLICATION.ACCESS_TOKEN_EXPIRE_SECONDS
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
